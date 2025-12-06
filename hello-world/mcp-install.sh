@@ -1,0 +1,1 @@
+uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/hello-world mcp install main.py

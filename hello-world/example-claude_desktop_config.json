@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "hello-world": {
+      "command": "/opt/miniconda3/bin/uv",
+      "args": [
+        "run",
+        "--frozen",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "/Users/path/to/your/mcp-servers/hello-world/main.py"
+      ]
+    }
+  }
+}
