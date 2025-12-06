@@ -1,1 +1,1 @@
-uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/hello-world mcp run dev main.py
+uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/hello-world mcp dev main.py

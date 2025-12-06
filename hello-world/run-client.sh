@@ -1,1 +1,1 @@
-uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/hello-world client.py
+uv run client.py

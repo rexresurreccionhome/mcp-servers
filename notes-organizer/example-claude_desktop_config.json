@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "notes-organizer": {
+      "command": "/opt/miniconda3/bin/uv",
+      "args": [
+        "run",
+        "--frozen",
+        "--with",
+        "mcp[cli]",
+        "mcp",
+        "run",
+        "/Users/rresurreccion/Desktop/projects/mcp-servers/notes-organizer/main.py"
+      ]
+    }
+  }
+}
