@@ -9,7 +9,7 @@
         "mcp[cli]",
         "mcp",
         "run",
-        "/Users/rresurreccion/Desktop/projects/mcp-servers/notes-organizer/main.py"
+        "/Users/path/to/your/mcp-servers/notes-organizer/main.py"
       ]
     }
   }
