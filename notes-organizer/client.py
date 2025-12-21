@@ -31,9 +31,37 @@ async def main():
                     print(f"  • {tool.name}")
                     print(f"    {tool.description}\n")
                 
-                # Step 2: Execute get_notes
+                # Step 2: Create a new note using add_note
                 print("=" * 60)
-                print("📚 Executing get_notes tool...")
+                print("✍️  Creating a new note with add_note tool...")
+                print("=" * 60)
+                
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                add_note_args = {
+                    "title": f"Test Note - {timestamp}",
+                    "content": f"This is a test note created by the MCP client at {timestamp}. The add_note tool successfully creates markdown files in the notes directory.",
+                    "overview": "A test note created by the MCP client to verify the add_note functionality"
+                }
+                
+                print(f"\n📝 Creating note with title: '{add_note_args['title']}'")
+                
+                add_result = await session.call_tool("add_note", arguments=add_note_args)
+                
+                print("\n✓ add_note tool executed!\n")
+                print("Response:")
+                
+                import json
+                created_note_info = None
+                for content in add_result.content:
+                    if hasattr(content, 'text'):
+                        created_note_info = json.loads(content.text)
+                        print(json.dumps(created_note_info, indent=2))
+                
+                # Step 3: Execute get_notes to verify the note was created
+                print(f"\n{'=' * 60}")
+                print("📚 Executing get_notes tool to verify note creation...")
                 print("=" * 60)
                 
                 result = await session.call_tool("get_notes", arguments={})
@@ -45,11 +73,36 @@ async def main():
                 notes_data = None
                 for content in result.content:
                     if hasattr(content, 'text'):
-                        import json
                         notes_data = json.loads(content.text)
                         print(json.dumps(notes_data, indent=2))
                 
-                # Step 3: If notes exist, randomly select one and get its full content
+                # Step 4: Retrieve the newly created note using get_note
+                if created_note_info and created_note_info.get('success'):
+                    created_file_name = created_note_info['file_name']
+                    
+                    print(f"\n{'=' * 60}")
+                    print(f"📖 Retrieving the newly created note: {created_file_name}")
+                    print("=" * 60)
+                    
+                    retrieve_result = await session.call_tool("get_note", arguments={"file_name": created_file_name})
+                    
+                    print("\n✓ get_note tool executed successfully!\n")
+                    print("Retrieved Note Content:")
+                    print("=" * 60)
+                    
+                    for content in retrieve_result.content:
+                        if hasattr(content, 'text'):
+                            retrieved_note = json.loads(content.text)
+                            if retrieved_note.get('success'):
+                                print(retrieved_note['content'])
+                                print("=" * 60)
+                                print(f"Size: {retrieved_note['size_bytes']} bytes")
+                                print(f"Modified: {retrieved_note['modified_date']}")
+                            else:
+                                print(f"Error: {retrieved_note.get('error')}")
+                                print(f"Message: {retrieved_note.get('message')}")
+                
+                # Step 5: If notes exist, randomly select one and get its full content
                 if notes_data and notes_data.get('success') and notes_data.get('notes'):
                     notes = notes_data['notes']
                     print(f"\n{'=' * 60}")

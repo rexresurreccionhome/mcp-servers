@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -86,6 +87,161 @@ def search_in_content(file_path: Path, search_term: str) -> bool:
         pass
     
     return False
+
+
+def sanitize_filename(title: str) -> str:
+    """
+    Convert a title into a safe filename.
+    
+    Args:
+        title: The title to convert
+    
+    Returns:
+        A sanitized filename (without .md extension)
+    """
+    # Remove special characters (keep only alphanumeric, spaces, hyphens, underscores)
+    sanitized = re.sub(r'[^\w\s-]', '', title)
+    
+    # Replace spaces with hyphens
+    sanitized = re.sub(r'\s+', '-', sanitized.strip())
+    
+    # Remove consecutive hyphens
+    sanitized = re.sub(r'-+', '-', sanitized)
+    
+    # Remove leading/trailing hyphens
+    sanitized = sanitized.strip('-')
+    
+    # If empty after sanitization, use a default name
+    if not sanitized:
+        sanitized = "untitled"
+    
+    return sanitized
+
+
+def get_unique_filename(base_name: str, directory: Path) -> str:
+    """
+    Generate a unique filename by appending a numeric suffix if needed.
+    
+    Args:
+        base_name: The base filename (without .md extension)
+        directory: The directory where the file will be created
+    
+    Returns:
+        A unique filename with .md extension
+    """
+    filename = f"{base_name}.md"
+    file_path = directory / filename
+    
+    if not file_path.exists():
+        return filename
+    
+    # File exists, append numeric suffix
+    counter = 1
+    while True:
+        filename = f"{base_name}-{counter}.md"
+        file_path = directory / filename
+        if not file_path.exists():
+            return filename
+        counter += 1
+
+
+@mcp.tool()
+def add_note(
+    title: str,
+    content: str,
+    overview: Optional[str] = None
+) -> dict:
+    """
+    Create a new markdown note in the notes folder.
+    
+    Args:
+        title: The title of the note (max 100 characters)
+        content: The main content of the note (max 1MB)
+        overview: Optional brief overview or summary (max 255 characters)
+    
+    Returns:
+        JSON object containing success status and file path or error message
+    """
+    # Validate title
+    if not title or not title.strip():
+        return {
+            "success": False,
+            "error": "Validation Error",
+            "message": "Title is required and cannot be empty"
+        }
+    
+    if len(title) > 100:
+        return {
+            "success": False,
+            "error": "Validation Error",
+            "message": f"Title exceeds maximum length of 100 characters (current: {len(title)})"
+        }
+    
+    # Validate content
+    if not content or not content.strip():
+        return {
+            "success": False,
+            "error": "Validation Error",
+            "message": "Content is required and cannot be empty"
+        }
+    
+    content_size = len(content.encode('utf-8'))
+    max_size = 1024 * 1024  # 1MB
+    if content_size > max_size:
+        return {
+            "success": False,
+            "error": "Validation Error",
+            "message": f"Content exceeds maximum size of 1MB (current: {content_size} bytes)"
+        }
+    
+    # Validate overview if provided
+    if overview is not None and len(overview) > 255:
+        return {
+            "success": False,
+            "error": "Validation Error",
+            "message": f"Overview exceeds maximum length of 255 characters (current: {len(overview)})"
+        }
+    
+    # Auto-generate overview if not provided
+    if overview is None:
+        overview = content.strip()[:255]
+    
+    # Ensure notes directory exists
+    try:
+        NOTES_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        return {
+            "success": False,
+            "error": "File System Error",
+            "message": f"Failed to create notes directory: {str(e)}"
+        }
+    
+    # Sanitize filename
+    sanitized_name = sanitize_filename(title)
+    filename = get_unique_filename(sanitized_name, NOTES_DIR)
+    file_path = NOTES_DIR / filename
+    
+    # Create the markdown content
+    markdown_content = f"# {title}\n{overview}\n\n## Content\n{content}\n"
+    
+    # Write the file
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(markdown_content)
+        
+        return {
+            "success": True,
+            "message": "Note created successfully",
+            "file_path": str(file_path),
+            "file_name": filename,
+            "title": title
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": "File System Error",
+            "message": f"Failed to write note: {str(e)}"
+        }
 
 
 @mcp.tool()
