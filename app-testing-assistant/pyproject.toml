@@ -8,5 +8,8 @@ dependencies = [
     "mcp[cli]>=1.23.1",
 ]
 
+[tool.setuptools]
+packages = ["app_testing_assistant"]
+
 [project.scripts]
 app-testing-assistant = "app_testing_assistant.main:main"

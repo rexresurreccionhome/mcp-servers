@@ -8,5 +8,8 @@ dependencies = [
     "mcp[cli]>=1.23.1",
 ]
 
+[tool.setuptools]
+packages = ["baker_virtual_assistant"]
+
 [project.scripts]
 baker-virtual-assistant = "baker_virtual_assistant.main:main"
