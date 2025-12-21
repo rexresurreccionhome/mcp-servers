@@ -11,5 +11,8 @@ dependencies = [
 [tool.setuptools]
 packages = ["notes_organizer"]
 
+[tool.setuptools.package-data]
+notes_organizer = ["../notes/*.md"]
+
 [project.scripts]
 notes-organizer = "notes_organizer.main:main"
