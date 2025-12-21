@@ -35,6 +35,7 @@ Helps QA testers and developers learn to write integration tests for APIs.
 Organize and search personal markdown notes.
 
 **Features:**
+- Create new notes with title, content, and overview
 - Search notes by content or filename
 - Filter by date range
 - Retrieve specific notes
