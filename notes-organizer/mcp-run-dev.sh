@@ -1,1 +1,4 @@
-uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/notes-organizer mcp dev main.py
+#!/bin/bash
+
+# Run the notes-organizer MCP server in development mode
+uv run mcp dev notes_organizer/main.py

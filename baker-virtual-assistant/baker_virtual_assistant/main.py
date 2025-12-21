@@ -134,5 +134,10 @@ def baker_virtual_assistant(user_input: str) -> str:
 Please provide your expert response following the guidelines above."""
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the baker-virtual-assistant MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

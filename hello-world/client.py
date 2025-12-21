@@ -8,7 +8,7 @@ async def main():
     # Define server parameters
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "main.py"],
+        args=["run", "hello_world/main.py"],
         env=None
     )
     

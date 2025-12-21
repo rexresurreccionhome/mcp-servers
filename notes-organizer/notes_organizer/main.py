@@ -7,8 +7,8 @@ from mcp.server.fastmcp import FastMCP
 # Initialize FastMCP server
 mcp = FastMCP("notes-organizer")
 
-# Define the notes directory
-NOTES_DIR = Path(__file__).parent / "notes"
+# Define the notes directory (in project root, not package directory)
+NOTES_DIR = Path(__file__).parent.parent / "notes"
 
 
 def get_note_metadata(file_path: Path) -> dict:
@@ -210,5 +210,10 @@ def get_note(file_name: str) -> dict:
         }
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the notes-organizer MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

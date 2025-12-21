@@ -1,9 +1,12 @@
 [project]
 name = "hello-world"
 version = "0.1.0"
-description = "Add your description here"
+description = "Simple Hello World MCP server for learning and demonstration purposes"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "mcp[cli]>=1.23.1",
 ]
+
+[project.scripts]
+hello-world = "hello_world.main:main"

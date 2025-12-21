@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "baker-virtual-assistant-local": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/mcp-servers/baker-virtual-assistant",
+        "run",
+        "baker-virtual-assistant"
+      ]
+    },
+    "app-testing-assistant-local": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/mcp-servers/app-testing-assistant",
+        "run",
+        "app-testing-assistant"
+      ]
+    },
+    "notes-organizer-local": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/mcp-servers/notes-organizer",
+        "run",
+        "notes-organizer"
+      ]
+    },
+    "hello-world-local": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/mcp-servers/hello-world",
+        "run",
+        "hello-world"
+      ]
+    }
+  }
+}

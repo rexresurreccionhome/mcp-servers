@@ -1,1 +1,4 @@
-uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/notes-organizer mcp install main.py
+#!/bin/bash
+
+# Install the notes-organizer MCP server
+uv run mcp install notes_organizer/main.py

@@ -531,5 +531,10 @@ You have access to:
 Always be educational and explain WHY you're recommending specific test approaches."""
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the app-testing-assistant MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

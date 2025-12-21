@@ -1,1 +1,4 @@
-uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/baker-virtual-assistant mcp dev main.py
+#!/bin/bash
+
+# Run the baker-virtual-assistant MCP server in development mode
+uv run mcp dev baker_virtual_assistant/main.py

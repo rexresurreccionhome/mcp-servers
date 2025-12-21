@@ -1,9 +1,12 @@
 [project]
 name = "baker-virtual-assistant"
 version = "0.1.0"
-description = "Add your description here"
+description = "MCP server providing baking expertise, recipes, and virtual baker assistant"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "mcp[cli]>=1.23.1",
 ]
+
+[project.scripts]
+baker-virtual-assistant = "baker_virtual_assistant.main:main"

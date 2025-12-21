@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "baker-virtual-assistant": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/rexresurreccionhome/mcp-servers.git#subdirectory=baker-virtual-assistant",
+        "baker-virtual-assistant"
+      ]
+    },
+    "app-testing-assistant": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/rexresurreccionhome/mcp-servers.git#subdirectory=app-testing-assistant",
+        "app-testing-assistant"
+      ]
+    },
+    "notes-organizer": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/rexresurreccionhome/mcp-servers.git#subdirectory=notes-organizer",
+        "notes-organizer"
+      ]
+    },
+    "hello-world": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/rexresurreccionhome/mcp-servers.git#subdirectory=hello-world",
+        "hello-world"
+      ]
+    }
+  }
+}

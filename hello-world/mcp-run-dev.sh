@@ -1,1 +1,4 @@
-uv run --directory /Users/rresurreccion/Desktop/projects/mcp-servers/hello-world mcp dev main.py
+#!/bin/bash
+
+# Run the hello-world MCP server in development mode
+uv run mcp dev hello_world/main.py

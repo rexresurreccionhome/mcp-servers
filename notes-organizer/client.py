@@ -9,7 +9,7 @@ async def main():
     # Define server parameters
     server_params = StdioServerParameters(
         command="uv",
-        args=["run", "main.py"],
+        args=["run", "notes_organizer/main.py"],
         env=None
     )
     

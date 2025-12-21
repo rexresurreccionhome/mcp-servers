@@ -18,5 +18,10 @@ def simple_hello_world_poem() -> str:
     )
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the hello-world MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
