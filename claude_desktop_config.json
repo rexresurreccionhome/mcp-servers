@@ -31,6 +31,17 @@
         "git+https://github.com/rexresurreccionhome/mcp-servers.git#subdirectory=hello-world",
         "hello-world"
       ]
+    },
+    "openai-rag-vector-store": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/rexresurreccionhome/mcp-servers.git#subdirectory=openai-rag-vector-store",
+        "openai-rag-vector-store"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-api-key-here"
+      }
     }
   }
 }

@@ -45,7 +45,20 @@ Organize and search personal markdown notes.
 
 ---
 
-### 4. **Hello World** 👋
+### 4. **OpenAI RAG Vector Store** 🔍
+Store and semantically search query history with contextual information using OpenAI's Vector Store API.
+
+**Features:**
+- Store search queries with context (including answers/results) and timestamps
+- Semantic search using OpenAI's built-in vector search (searches across queries and context)
+- Date range filtering
+- Persistent cloud storage via OpenAI
+
+**Use Cases:** Search history tracking, Q&A knowledge base, semantic query matching, research organization
+
+---
+
+### 5. **Hello World** 👋
 Simple demonstration MCP server for learning.
 
 **Features:**

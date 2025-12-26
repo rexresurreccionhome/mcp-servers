@@ -74,7 +74,7 @@ def store_search_query_handler(query: str, context: Optional[str] = None, timest
     
     Args:
         query: The search query text to store
-        context: Additional context or metadata about the search
+        context: Additional context or metadata about the search (can include the answer/result)
         timestamp: ISO 8601 timestamp (defaults to current time)
     
     Returns:
@@ -115,7 +115,8 @@ Search query stored for semantic search and retrieval."""
                 with open(renamed_path, 'rb') as renamed_file:
                     file = client.files.create(
                         file=renamed_file,
-                        purpose='assistants'
+                        purpose='assistants',
+
                     )
             
             # Add file to vector store
@@ -167,131 +168,85 @@ def retrieve_search_history_handler(
         end_date: ISO 8601 date to filter results until
     
     Returns:
-        dict: Search results with queries, context, timestamps, and similarity scores
+        dict: Search results with file_id, file_content (full text), timestamp, and similarity scores
     """
     try:
         # Get or create vector store
         vs_id = get_or_create_vector_store()
         
-        # List all files in the vector store
-        vector_store_files = client.vector_stores.files.list(
-            vector_store_id=vs_id,
-            limit=100  # Get up to 100 files for filtering
-        )
-        
-        if not vector_store_files.data:
+        # Use vector store search API (requires search_term)
+        if not search_term:
             return {
-                "success": True,
+                "success": False,
                 "results": [],
                 "count": 0,
-                "message": "No search history found in vector store"
+                "message": "search_term is required to retrieve search history"
             }
         
-        # Retrieve and parse all file contents from filenames
-        all_queries = []
-        for vs_file in vector_store_files.data:
-            try:
-                # Get file details
-                file_info = client.files.retrieve(vs_file.id)
-                filename = file_info.filename
+        try:
+            # Use OpenAI's vector store search API
+            search_results = client.vector_stores.search(
+                vector_store_id=vs_id,
+                query=search_term,
+                max_num_results=limit
+            )
+            
+            # Process search results and extract content directly
+            results = []
+            for result in search_results.data:
+                # Extract content from search result
+                file_content = ""
+                if hasattr(result, 'content') and result.content:
+                    for content_item in result.content:
+                        if content_item.type == 'text':
+                            file_content += content_item.text
                 
-                # Parse filename: "timestamp___query.txt"
-                if '___' in filename:
-                    parts = filename.replace('.txt', '').split('___', 1)
-                    if len(parts) == 2:
-                        timestamp = parts[0]
-                        query = parts[1]
+                # Parse timestamp from content
+                timestamp = ""
+                
+                for line in file_content.split('\n'):
+                    if line.startswith('Timestamp: '):
+                        timestamp = line.replace('Timestamp: ', '', 1)
+                
+                # Apply date filtering if specified
+                if timestamp and (start_date or end_date):
+                    try:
+                        entry_timestamp = datetime.fromisoformat(timestamp)
                         
-                        # Apply date filtering if specified
-                        if timestamp and (start_date or end_date):
-                            try:
-                                entry_timestamp = datetime.fromisoformat(timestamp)
-                                
-                                if start_date:
-                                    start_dt = datetime.fromisoformat(start_date)
-                                    if entry_timestamp < start_dt:
-                                        continue
-                                
-                                if end_date:
-                                    end_dt = datetime.fromisoformat(end_date)
-                                    if entry_timestamp > end_dt:
-                                        continue
-                            except ValueError:
-                                logger.warning(f"Invalid timestamp format: {timestamp}")
+                        if start_date:
+                            start_dt = datetime.fromisoformat(start_date)
+                            if entry_timestamp < start_dt:
+                                continue
                         
-                        all_queries.append({
-                            "file_id": vs_file.id,
-                            "query": query,
-                            "context": "",  # Context not stored in filename
-                            "timestamp": timestamp,
-                            "filename": filename
-                        })
+                        if end_date:
+                            end_dt = datetime.fromisoformat(end_date)
+                            if entry_timestamp > end_dt:
+                                continue
+                    except ValueError:
+                        logger.warning(f"Invalid timestamp format: {timestamp}")
+                        continue
                 
-            except Exception as e:
-                logger.warning(f"Error processing file {vs_file.id}: {str(e)}")
-                continue
-        
-        # If search_term is provided, use built-in vector store search
-        if search_term:
-            try:
-                # Use OpenAI's built-in vector store search
-                search_results = client.vector_stores.search(
-                    vector_store_id=vs_id,
-                    query=search_term,
-                    max_num_results=limit
-                )
-                
-                # Process search results
-                results = []
-                for result in search_results.data:
-                    # Extract file ID from the search result
-                    file_id = result.file_id
-                    score = result.score
-                    
-                    # Find matching query from all_queries
-                    matching_query = next((q for q in all_queries if q["file_id"] == file_id), None)
-                    
-                    if matching_query:
-                        matching_query["similarity_score"] = score
-                        results.append(matching_query)
-                
-                # Remove filename field from results
-                for result in results:
-                    result.pop("filename", None)
-                
-                return {
-                    "success": True,
-                    "results": results,
-                    "count": len(results),
-                    "message": f"Retrieved {len(results)} search queries matching '{search_term}'"
-                }
-                
-            except Exception as e:
-                logger.error(f"Error using vector store search: {str(e)}")
-                # Fall back to chronological listing if search fails
-                pass
-        
-        # If no search_term or search failed, return chronological list
-        # Sort by timestamp (most recent first)
-        all_queries = sorted(
-            all_queries,
-            key=lambda x: x.get("timestamp", ""),
-            reverse=True
-        )
-        
-        # Limit results
-        results = all_queries[:limit]
-        
-        # Remove filename field from results for cleaner output
-        for result in results:
-            result.pop("filename", None)
-        
-        return {
-            "success": True,
-            "results": results,
-            "count": len(results),
-            "message": f"Retrieved {len(results)} search queries" + (f" matching '{search_term}'" if search_term else "")
-        }
+                results.append({
+                    "file_id": result.file_id,
+                    "file_content": file_content,
+                    "timestamp": timestamp,
+                    "similarity_score": result.score
+                })
+            
+            return {
+                "success": True,
+                "results": results,
+                "count": len(results),
+                "message": f"Retrieved {len(results)} search queries matching '{search_term}'"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error performing vector store search: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "message": f"Failed to perform search. Error: {str(e)}"
+            }
         
     except Exception as e:
         logger.error(f"Error retrieving search history: {str(e)}")
@@ -313,7 +268,7 @@ def store_search_query(query: str, context: str = "", timestamp: str = "") -> di
     
     Args:
         query: The search query text to store
-        context: Additional context or metadata about the search
+        context: Additional context or metadata about the search (can include the answer/result to the query)
         timestamp: ISO 8601 timestamp (defaults to current time if not provided)
     
     Returns:
@@ -324,7 +279,7 @@ def store_search_query(query: str, context: str = "", timestamp: str = "") -> di
 
 @mcp.tool()
 def retrieve_search_history(
-    search_term: str = "",
+    search_term: str,
     limit: int = 10,
     start_date: str = "",
     end_date: str = ""
@@ -333,16 +288,16 @@ def retrieve_search_history(
     Retrieve and search through stored query history using semantic search with optional date filtering.
     
     Args:
-        search_term: Query to search for similar past searches using semantic similarity
+        search_term: Query to search for similar past searches using semantic similarity (required)
         limit: Maximum number of results to return (default: 10)
         start_date: ISO 8601 date to filter results from (e.g., '2025-01-01')
         end_date: ISO 8601 date to filter results until (e.g., '2025-12-31')
     
     Returns:
-        dict: Search results with queries, context, timestamps, and similarity scores
+        dict: Search results with file_id, file_content (includes Query, Context, Timestamp), and similarity_score for each result
     """
     return retrieve_search_history_handler(
-        search_term if search_term else None,
+        search_term,
         limit,
         start_date if start_date else None,
         end_date if end_date else None

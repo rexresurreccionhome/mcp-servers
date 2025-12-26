@@ -4,10 +4,10 @@ A Model Context Protocol (MCP) Server that implements a RAG (Retrieval-Augmented
 
 ## Features
 
-- **Store Search Queries**: Save search queries with context and timestamps into OpenAI Vector Store
-- **Semantic Search**: Retrieve similar past searches using vector embeddings and semantic similarity
+- **Store Search Queries with Context**: Save search queries along with contextual information (including answers/results) and timestamps into OpenAI Vector Store
+- **Semantic Search**: Retrieve similar past searches using vector embeddings and semantic similarity (searches across both queries and context)
 - **Date Filtering**: Filter search history by date ranges
-- **Persistent Storage**: All queries are stored in OpenAI's Vector Store for long-term persistence
+- **Persistent Storage**: All queries and context are stored in OpenAI's Vector Store for long-term persistence
 
 ## Prerequisites
 
@@ -50,19 +50,19 @@ This will:
 
 #### 1. `store_search_query`
 
-Store a search query into the vector store.
+Store a search query with optional context into the vector store.
 
 **Parameters**:
 - `query` (required): The search query text to store
-- `context` (optional): Additional context or metadata
+- `context` (optional): Additional context or metadata (can include the answer/result to the query)
 - `timestamp` (optional): ISO 8601 timestamp (defaults to current time)
 
 **Example**:
 ```json
 {
-  "query": "machine learning tutorials",
-  "context": "Looking for beginner-friendly resources",
-  "timestamp": "2025-12-25T10:30:00Z"
+  "query": "What are the best machine learning tutorials for beginners?",
+  "context": "Top beginner-friendly ML tutorials include: 1) Andrew Ng's Coursera course, 2) fast.ai's Practical Deep Learning, 3) Google's Machine Learning Crash Course. These provide hands-on experience with real-world datasets.",
+  "timestamp": "2025-12-26T10:30:00Z"
 }
 ```
 
@@ -71,18 +71,37 @@ Store a search query into the vector store.
 Retrieve and search through stored query history.
 
 **Parameters**:
-- `search_term` (optional): Query for semantic similarity search
+- `search_term` (required): Query for semantic similarity search
 - `limit` (optional): Maximum results to return (default: 10)
 - `start_date` (optional): Filter from this date (ISO 8601)
 - `end_date` (optional): Filter until this date (ISO 8601)
 
+**Returns**: Array of results containing `file_id`, `file_content` (full stored content including Query, Context, Timestamp), `timestamp`, and `similarity_score`
+
 **Example**:
 ```json
 {
-  "search_term": "AI learning",
+  "search_term": "AI learning resources",
   "limit": 5,
   "start_date": "2025-01-01",
   "end_date": "2025-12-31"
+}
+```
+
+**Example Response**:
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "file_id": "file-123",
+      "file_content": "Query: What are the best ML tutorials?\nContext: Andrew Ng's course...\nTimestamp: 2025-12-26T10:30:00Z\n\nSearch query stored...",
+      "timestamp": "2025-12-26T10:30:00Z",
+      "similarity_score": 0.95
+    }
+  ],
+  "count": 1,
+  "message": "Retrieved 1 search queries matching 'AI learning resources'"
 }
 ```
 
@@ -127,16 +146,17 @@ openai-rag-vector-store/
 
 ## How It Works
 
-1. **Storage**: When you store a query, it's converted to vector embeddings using OpenAI's `text-embedding-3-small` model and saved to a persistent Vector Store
+1. **Storage**: When you store a query with context, the combined content is converted to vector embeddings using OpenAI's `text-embedding-3-small` model and saved to a persistent Vector Store
 2. **Retrieval**: When searching, the search term is also converted to embeddings, and cosine similarity is calculated to find the most relevant past queries
-3. **Persistence**: All data is stored in OpenAI's cloud, so it persists across server restarts
+3. **Enhanced Search**: Storing context (including answers) alongside queries enriches the vector embeddings, enabling semantic search for better retrieval accuracy
+4. **Persistence**: All data is stored in OpenAI's cloud, so it persists across server restarts
 
 ## Technical Details
 
 - **Vector Store**: Uses OpenAI's Beta Vector Store API
 - **Embeddings Model**: `text-embedding-3-small` for efficient semantic search
 - **Similarity Metric**: Cosine similarity for ranking results
-- **Storage Format**: JSON documents with query, context, and timestamp
+- **Storage Format**: Documents with query, context, and timestamp
 
 ## Troubleshooting
 
