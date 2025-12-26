@@ -15,3 +15,5 @@ wheels/
 # Notes folder - exclude test notes
 notes-organizer/notes/Test*
 
+# VSCode settings
+.vscode/
