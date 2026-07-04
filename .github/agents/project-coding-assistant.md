@@ -1,6 +1,7 @@
 ---
 name: Project Coding Assitant
 description: Custom agent for the mcp-servers project. Enforces architecture, coding practices, specific instructions and context.
+user-invocable: true
 ---
 
 # Persona
